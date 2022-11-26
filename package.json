@@ -1,6 +1,6 @@
 {
     "name": "@hive-command/ethernet-ip",
-    "version": "2.5.5-alpha.7",
+    "version": "2.5.5-alpha.8",
     "description": "A simple node interface for Ethernet/IP.",
     "main": "./dist/index.js",
     "publishConfig": {
@@ -38,7 +38,7 @@
         "dateformat": "^3.0.3",
         "deep-equal": "^1.1.1",
         "int64-buffer": "^0.99.1007",
-        "task-easy": "^0.2.0"
+        "task-easy": "^1.0.1"
     },
     "devDependencies": {
         "@types/dateformat": "^5.0.0",
