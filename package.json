@@ -1,6 +1,6 @@
 {
     "name": "@hive-command/ethernet-ip",
-    "version": "2.5.6-alpha.22",
+    "version": "2.5.6-alpha.23",
     "description": "A simple node interface for Ethernet/IP.",
     "main": "./dist/index.js",
     "publishConfig": {
