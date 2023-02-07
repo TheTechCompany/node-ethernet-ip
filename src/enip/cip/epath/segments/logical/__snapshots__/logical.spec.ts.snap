@@ -1,0 +1,74 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 1`] = `
+{
+  "data": [
+    32,
+    5,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 2`] = `
+{
+  "data": [
+    36,
+    2,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 3`] = `
+{
+  "data": [
+    48,
+    1,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 4`] = `
+{
+  "data": [
+    37,
+    244,
+    1,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 5`] = `
+{
+  "data": [
+    37,
+    0,
+    244,
+    1,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 6`] = `
+{
+  "data": [
+    48,
+    1,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH LOGICAL Segment Build Utility Generates Appropriate Output 7`] = `
+{
+  "data": [
+    36,
+    2,
+  ],
+  "type": "Buffer",
+}
+`;

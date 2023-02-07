@@ -1,0 +1,137 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 1`] = `
+{
+  "data": [
+    145,
+    10,
+    84,
+    111,
+    116,
+    97,
+    108,
+    67,
+    111,
+    117,
+    110,
+    116,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 2`] = `
+{
+  "data": [
+    128,
+    2,
+    1,
+    2,
+    3,
+    0,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 3`] = `
+{
+  "data": [
+    145,
+    7,
+    83,
+    111,
+    109,
+    101,
+    84,
+    97,
+    103,
+    0,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 4`] = `
+{
+  "data": [
+    40,
+    0,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 5`] = `
+{
+  "data": [
+    40,
+    255,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 6`] = `
+{
+  "data": [
+    41,
+    0,
+    0,
+    1,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 7`] = `
+{
+  "data": [
+    41,
+    0,
+    1,
+    1,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 8`] = `
+{
+  "data": [
+    41,
+    0,
+    255,
+    255,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 9`] = `
+{
+  "data": [
+    42,
+    0,
+    0,
+    0,
+    1,
+    0,
+  ],
+  "type": "Buffer",
+}
+`;
+
+exports[`EPATH DATA Segment Build Utility Generates Appropriate Output 10`] = `
+{
+  "data": [
+    42,
+    0,
+    1,
+    0,
+    1,
+    0,
+  ],
+  "type": "Buffer",
+}
+`;

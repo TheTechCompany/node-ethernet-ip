@@ -1,0 +1,23 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Tag List Generate List Message Requests Method Generates Appropriate Output Instance 0 1`] = `
+{
+  "data": [
+    85,
+    3,
+    32,
+    107,
+    37,
+    0,
+    0,
+    0,
+    2,
+    0,
+    1,
+    0,
+    2,
+    0,
+  ],
+  "type": "Buffer",
+}
+`;
