@@ -266,4 +266,17 @@ export class TagGroup extends EventEmitter {
     // region Event Handlers
 
     // endregion
+
+    //Split tag group from index to index into smaller tag group to stop overloading the PLC
+    slice(start: number, end: number){
+        let tg = new TagGroup()
+        
+        let keys = Object.keys(this.state.tags).slice(start, end)
+
+        keys.forEach((key) => {
+            tg.add(this.state.tags[key])
+        })
+
+        return tg;
+    }
 }

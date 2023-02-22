@@ -17,7 +17,7 @@ const compare = (obj1, obj2) => {
 export class Controller extends EthernetIP {
     workers: { read: Queue<any>; write: Queue<any>; group: Queue<any>; };
 
-    
+
     /**
      * 
      * @param {boolean} [connectedMessaging=true] whether to use connected or unconnected messaging
@@ -670,28 +670,44 @@ export class Controller extends EthernetIP {
         this.state.scanning = true;
 
         while (this.state.scanning) {
-            await this.workers.group
+
+            const parts = (this.state.subs || []).length / 100;
+
+            if(parts > 1){
+                //More than 100 tags waiting to be read, split up into 100 piece chunks
+
+                const sub_parts : any[] = [];
+                for(var i = 0; i < parts; i++){
+                    sub_parts.push(this.state.subs?.slice(i * 100, (i * 100) + 100))
+                }
+
+                await Promise.all(sub_parts.map(async (sub) => {
+                    await this.workers.group.schedule(this._readTagGroup.bind(this), [sub], {
+                        priority: 10,
+                        timestamp: new Date()
+                    })
+                }));
+
+            }else{
+                //Less than 100 tags, read all at once
+                await this.workers.group
                 .schedule(this._readTagGroup.bind(this), [this.state.subs], {
                     priority: 10,
                     timestamp: new Date()
                 })
-                .catch(e => {
-                    return Promise.reject(e)
-                });
+
+            }
+            // this.state.subs?.slice()
 
             await this.workers.group
                 .schedule(this._writeTagGroup.bind(this), [this.state.subs], {
                     priority: 10,
                     timestamp: new Date()
                 })
-                .catch(e => {
-                    return Promise.reject(e)
-                });
-
+                
             await delay(this.state.scan_rate);
         }
 
-        return Promise.resolve()
     }
 
     /**
@@ -943,7 +959,7 @@ export class Controller extends EthernetIP {
      * @returns {Promise}
      * @memberof Controller
      */
-    async _readTagGroup(group) {
+    async _readTagGroup(group : TagGroup) {
         const messages = group.generateReadMessageRequests();
 
         const readTagGroupErr = new Error("TIMEOUT occurred while writing Reading Tag Group.");
@@ -956,6 +972,7 @@ export class Controller extends EthernetIP {
                 new Promise((resolve, reject) => {
                     this.on("Multiple Service Packet", async (err, data) => {
                         if (err && err.generalStatusCode !== 6) reject(err);
+                        
                         for (let i = 0; i < data.length; i++) {
                             if (data[i].generalStatusCode === 6) {
                                 await this._readTagFragmented(group.state.tags[msg.tag_ids[i]]).catch(reject);

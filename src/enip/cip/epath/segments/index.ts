@@ -1,6 +1,6 @@
-const PORT = require("./port");
-const LOGICAL = require("./logical");
-const DATA = require("./data");
+import * as PORT from "./port";
+import * as LOGICAL from "./logical";
+import * as DATA from "./data";
 
 const SegmentTypes = {
     PORT: 0 << 5, // Communication Port to Leave Node (Shall be 1 for a Backplane), Link Address of Next Device

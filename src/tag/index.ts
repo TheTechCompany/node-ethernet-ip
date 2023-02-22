@@ -7,8 +7,10 @@ import { Types, getTypeCodeString, isValidTypeCode } from "../enip/cip/data-type
 import dateFormat from "dateformat";
 import equals from "deep-equal";
 
+export type ValueType =  {[key: string]: any} | string | boolean[] | number[] | bigint | number | boolean | null; 
 // Static Class Property - Tracks Instances
 let instances = 0;
+
 export class Tag extends EventEmitter {
 
     program: any;
@@ -19,8 +21,8 @@ export class Tag extends EventEmitter {
             type?: number | null; 
             arrayDims: number; 
             bitIndex: number | null; 
-            value: {[key: string]: any} | string | boolean[] | number[] | bigint | number | boolean | null; 
-            controllerValue: {[key: string]: any} | string | boolean[] | number[] | bigint | number | boolean | null;
+            value: ValueType; 
+            controllerValue: ValueType;
             path: Buffer; 
             program?: string | null; 
             stage_write: boolean; 
@@ -65,10 +67,10 @@ export class Tag extends EventEmitter {
         // Split by "." to only check udt members and bit index.
         let memArr = tagname.split(".");
         let isBitIndex = (memArr.length > 1) && (parseInt(memArr[memArr.length - 1]) % 1 === 0);
-
+        
         // Check if BIT_STRING data type was passed in
         let isBitString = datatype === Types.BIT_STRING && parseInt(pathArr[pathArr.length - 1]) % 1 === 0;
-
+        
         // Tag can not be both a bit index and BIT_STRING
         if (isBitString && isBitIndex)
             throw "Tag cannot be defined as a BIT_STRING and have a bit index";
@@ -82,12 +84,14 @@ export class Tag extends EventEmitter {
                 (parseInt(pathArr[pathArr.length - 1]) - bitIndex) /
                 32
             ).toString();
+
         } else {
             if (isBitIndex) {
                 // normal bit index handling
                 let bitItem = pathArr.pop();
                 if(!bitItem) throw new Error(`Bit not found`)
                 bitIndex = parseInt(bitItem);
+
                 if ((bitIndex < 0) || (bitIndex > 31))
                     throw new Error(`Tag bit index must be between 0 and 31, received ${bitIndex}`);
             }
@@ -247,7 +251,7 @@ export class Tag extends EventEmitter {
      * @memberof Tag
      * @returns {number|string|boolean|object} value
      */
-    get value() {
+    get value() : ValueType {
         if (Array.isArray(this.state.tag.value)) {
             let prevValue = [...this.state.tag.value]
             setTimeout(() => {
@@ -266,8 +270,9 @@ export class Tag extends EventEmitter {
      * @property {number|string|boolean|object} new value
      */
     set value(newValue) {
-        if (!equals(newValue, this.state.tag.value))
+        if (!equals(newValue, this.state.tag.value)){
             this.state.tag.stage_write = true;
+        }
         
         this.state.tag.value = newValue;
     }
