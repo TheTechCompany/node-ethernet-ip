@@ -661,7 +661,8 @@ export class Tag extends EventEmitter {
             buf.writeUInt16LE(size, 2);
         }
 
-        if(!tag.value) return;
+        //This is to check for a tag value - it used to be !tag.value which negates 0s and causes me alot of pain :'(
+        if(tag.value == null || tag.value == undefined) return;
 
         /* eslint-disable indent */
         switch (tag.type) {

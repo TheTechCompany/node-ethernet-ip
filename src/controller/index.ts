@@ -24,7 +24,13 @@ export class Controller extends EthernetIP {
      * @param {object} [opts]
      * @param {number} [opts.unconnectedSendTimeout=2000]
      */
-    constructor(connectedMessaging = true, opts: any = {}) {
+    constructor(
+        connectedMessaging = true, 
+        opts: {
+            unconnectedSendTimeout?: number,
+            maxScanSize?: number 
+        } = {}
+    ) {
         super();
 
         this.state = {
@@ -44,7 +50,9 @@ export class Controller extends EthernetIP {
                 minorUnrecoverableFault: false,
                 majorRecoverableFault: false,
                 majorUnrecoverableFault: false,
-                io_faulted: false
+                io_faulted: false,
+
+                maxScanSize: opts.maxScanSize || 50,
             },
             subs: new TagGroup(),
             scanning: false,
@@ -667,27 +675,36 @@ export class Controller extends EthernetIP {
      * @memberof Controller
      */
     async scan() {
+        //TODO interrogate system and tag types present to come up with a real size limit
+        const max_scan_size = this.state.controller.maxScanSize || 50;
+
         this.state.scanning = true;
 
         while (this.state.scanning) {
 
-            const parts = (this.state.subs || []).length / 100;
+            const parts = (this.state.subs || []).length / max_scan_size;
 
             if(parts > 1){
                 //More than 100 tags waiting to be read, split up into 100 piece chunks
 
                 const sub_parts : any[] = [];
                 for(var i = 0; i < parts; i++){
-                    sub_parts.push(this.state.subs?.slice(i * 100, (i * 100) + 100))
+                    sub_parts.push(this.state.subs?.slice(i * max_scan_size, (i * max_scan_size) + max_scan_size))
                 }
 
-                await Promise.all(sub_parts.map(async (sub) => {
+                for(var ix = 0; ix < sub_parts.length; ix++){
+                    let sub = sub_parts[ix];
                     await this.workers.group.schedule(this._readTagGroup.bind(this), [sub], {
                         priority: 10,
                         timestamp: new Date()
                     })
-                }));
 
+                    await this.workers.group.schedule(this._writeTagGroup.bind(this), [sub], {
+                            priority: 10,
+                            timestamp: new Date()
+                    })
+                }
+                
             }else{
                 //Less than 100 tags, read all at once
                 await this.workers.group
@@ -696,14 +713,13 @@ export class Controller extends EthernetIP {
                     timestamp: new Date()
                 })
 
-            }
-            // this.state.subs?.slice()
-
-            await this.workers.group
+                await this.workers.group
                 .schedule(this._writeTagGroup.bind(this), [this.state.subs], {
                     priority: 10,
                     timestamp: new Date()
                 })
+
+            }
                 
             await delay(this.state.scan_rate);
         }
