@@ -1,16 +1,16 @@
 import net from 'net';
-import {Controller} from '../controller';
+import { Controller } from '../controller';
 import { EventEmitter } from 'events';
 import { Tag } from '../tag';
 import { Types } from '../enip/cip/data-types';
 
 export class ControllerManager extends EventEmitter {
-  controllers : ManagedController[];
+  controllers: ManagedController[];
 
   constructor() {
     super();
     this.controllers = [];
-  }
+  } 
 
   //Add controller
   addController(ipAddress, slot = 0, rpi = 100, connected = true, retrySP = 3000, opts = {}) {
@@ -24,15 +24,17 @@ export class ControllerManager extends EventEmitter {
     this.controllers.forEach(controller => {
       let tags = {}
       controller.tags.forEach(tag => {
-        tags[tag.tag.name] = tag.tag.value
+        if(tag.tag){
+          tags[tag.tag.name] = tag.tag.value
+        }
       })
       allTags[controller.ipAddress] = tags
-    }) 
+    })
     return allTags
   }
 }
 
-export class ManagedController extends EventEmitter{
+export class ManagedController extends EventEmitter {
 
   reconnect: boolean;
   ipAddress: any;
@@ -40,8 +42,17 @@ export class ManagedController extends EventEmitter{
   opts: {};
   rpi: number;
   PLC: Controller | null;
-  tags: any[];
-  connected: boolean;
+
+  tags: {
+    tagname: string,
+    program: string | null | undefined,
+    dataType: number,
+    arrayDims: number,
+    arraySize: number,
+    tag: Tag | null
+  }[];
+
+  public connected: boolean;
   conncom: boolean;
   retryTimeSP: number;
 
@@ -59,28 +70,26 @@ export class ManagedController extends EventEmitter{
     this.retryTimeSP = retrySP;
   }
 
-  async connect() {
+  async connect(scanSize?: number) {
     this.reconnect = true;
-    this.PLC = new Controller(this.conncom);
+    this.PLC = new Controller(this.conncom, {maxScanSize: scanSize});
     this.PLC.rpi = this.rpi;
 
-    try{
-      const plc = await this.PLC.connect(this.ipAddress, this.slot)
-      this.connected = true;
-      this.emit('Connected');
-      plc.scan_rate = this.rpi;
-        
-      this.tags.forEach(tag => {
-        tag.tag = plc.newTag(tag.tagname, tag.program, true, 10, tag.arrayDims, tag.arraySize)
-        this.addTagEvents(tag.tag)
-      })
+    const plc = await this.PLC.connect(this.ipAddress, this.slot)
 
-      plc.scan()
-        .catch(e => {this.errorHandle(e)})
-        
-    }catch(e){
-      this.errorHandle(e)
-    }
+    this.connected = true;
+    this.emit('Connected');
+
+    plc.scan_rate = this.rpi;
+
+    this.tags.forEach(tag => {
+      tag.tag = plc.newTag(tag.tagname, tag.program, true, tag.dataType, tag.arrayDims, tag.arraySize)
+      this.addTagEvents(tag.tag)
+    })
+
+    plc.scan()
+      .catch(e => { this.errorHandle(e) })
+
   }
 
   addTagEvents(tag) {
@@ -95,17 +104,17 @@ export class ManagedController extends EventEmitter{
   errorHandle(e) {
     this.emit('Error', e)
 
-    if(e.message && (e.message.slice(0,7) === 'TIMEOUT' || e.message.slice(0,6) === 'SOCKET')) {
+    if (e.message && (e.message.slice(0, 7) === 'TIMEOUT' || e.message.slice(0, 6) === 'SOCKET')) {
 
       this.connected = false;
       this.PLC?.destroy();
       this.emit('Disconnected');
-      if(this.reconnect) {setTimeout(() => {this.connect()}, this.retryTimeSP)};
+      if (this.reconnect) { setTimeout(() => { this.connect() }, this.retryTimeSP) };
     }
   }
-  
-  addTag(tagname, program = null, dataType: Types = 0, keepAlive: number = 0, arrayDims = 0, arraySize = 0x01) {
-    let tag : Tag | null = null
+
+  addTag(tagname, program: string | null = null, dataType: Types = Types.BOOL, keepAlive: number = 0, arrayDims = 0, arraySize = 0x01) {
+    let tag: Tag | null = null
     if (this.connected && this.PLC) {
       tag = this.PLC.newTag(tagname, program, true, dataType, keepAlive, arrayDims, arraySize);
       this.addTagEvents(tag)
@@ -113,6 +122,7 @@ export class ManagedController extends EventEmitter{
     this.tags.push({
       tagname: tagname,
       program: program,
+      dataType,
       arrayDims: arrayDims,
       arraySize: arraySize,
       tag: tag
@@ -124,6 +134,7 @@ export class ManagedController extends EventEmitter{
     return new Promise<void>((resolve, reject) => {
       this.connected = false;
       this.reconnect = false;
+
       this.PLC?.disconnect().then(() => {
         this.emit('Disconnected');
         resolve();
@@ -131,7 +142,7 @@ export class ManagedController extends EventEmitter{
         net.Socket.prototype.destroy.call(this.PLC);
         this.emit('Disconnected');
         resolve();
-      })    
+      })
     })
   }
 

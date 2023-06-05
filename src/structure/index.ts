@@ -12,7 +12,7 @@ export class Structure extends Tag {
     _template: any;
     state: any;
 
-    constructor (tagname, taglist, program = null, datatype : number, keepAlive = 0, arrayDims = 0, arraySize = 0x01) {
+    constructor (tagname, taglist, program : string | null = null, datatype : number, keepAlive = 0, arrayDims = 0, arraySize = 0x01) {
         super(tagname, program, datatype, keepAlive, arrayDims, arraySize);
         this._valueObj = null;
         this._taglist = taglist;

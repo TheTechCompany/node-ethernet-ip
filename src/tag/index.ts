@@ -45,6 +45,7 @@ export class Tag extends EventEmitter {
         } 
         if (!(!datatype) && !isValidTypeCode(datatype))
             throw new Error("Datatype must be a Valid Type Code <number>");
+        
         if (typeof keepAlive !== "number")
             throw new Error(
                 `Tag expected keepAlive of type <number> instead got type <${typeof keepAlive}>`

@@ -196,7 +196,7 @@ export default class ENIP extends EventEmitter {
     // // @ov
 
     // //timeoutSP = 10000;
-     public async connect (IP_ADDR: string, timeoutSP : number | undefined =10000) {
+     public async connect (IP_ADDR: string, timeoutSP : number | undefined = 10000) {
 
         if (!IP_ADDR) {
             throw new Error("Controller <class> requires IP_ADDR <string>!!!");

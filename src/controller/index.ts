@@ -234,6 +234,11 @@ export class Controller extends EthernetIP {
      * @returns {Promise}
      */
     async disconnect() {
+
+        if(this.scanning){
+            this.pauseScan();
+        }
+
         if (super.established_conn === true) {
             const closeid = await this.forwardClose();
             if(!closeid) throw new Error("Failed to End Connected EIP Session with Forward Close Request");
@@ -1385,7 +1390,7 @@ export class Controller extends EthernetIP {
         return tag.state.read_size
     }
 
-    newTag(tagname, program = null, subscribe = true, dataType: Types = 0, keepAlive: number = 0, arrayDims = 0, arraySize = 0x01) {
+    newTag(tagname, program: string | null = null, subscribe = true, dataType: Types = Types.BOOL, keepAlive: number = 0, arrayDims = 0, arraySize = 0x01) {
         let template = this.state.tagList?.getTemplateByTag(tagname, program); 
         let tag : Tag | null = null
         if (template) {

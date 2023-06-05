@@ -228,7 +228,7 @@ export class TagList {
         return this.tags.find(tag => tag.name === tagName && tag.program === program);
     }
 
-    getTemplateByTag(tagName, program = null) {
+    getTemplateByTag(tagName, program : string | null = null) {
 
         const tagArray = tagName.split(".");
         const tag = this.tags.find(tag => tag.name.toLowerCase() === tagArray[0].toLowerCase() && String(tag.program).toLowerCase() === String(program).toLowerCase());
