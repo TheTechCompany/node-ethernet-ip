@@ -15,8 +15,9 @@ const compare = (obj1, obj2) => {
 };
 
 export class Controller extends EthernetIP {
-    workers: { read: Queue<any>; write: Queue<any>; group: Queue<any>; };
+    // workers: { read: Queue<any>; write: Queue<any>; group: Queue<any>; };
 
+    worker_group : Queue<any>;
 
     /**
      * 
@@ -65,11 +66,13 @@ export class Controller extends EthernetIP {
             tagList: new TagList(),
         };
 
-        this.workers = {
-            read: new Queue(compare, 500),
-            write: new Queue(compare, 500),
-            group: new Queue(compare, 500),
-        };
+        // this.workers = {
+        //     read: new Queue(compare, 500),
+        //     write: new Queue(compare, 500),
+        //     group: new Queue(compare, 500),
+        // };
+
+        this.worker_group = new Queue(compare, 500)
     }
 
     // region Property Definitions
@@ -613,10 +616,16 @@ export class Controller extends EthernetIP {
      * @memberof Controller
      */
     readTag(tag: Tag, size = null) {
-        return this.workers.read.schedule(this._readTag.bind(this), [tag, size], {
+        return this.worker_group.schedule(async (tag, size) => {
+            return await this._readTag(tag, size)
+        }, [tag, size], {
             priority: 1,
             timestamp: new Date()
-        });
+        })
+        // return this.workers.read.schedule(this._readTag.bind(this), [tag, size], {
+        //     priority: 1,
+        //     timestamp: new Date()
+        // });
     }
 
     /**
@@ -630,10 +639,18 @@ export class Controller extends EthernetIP {
      */
     writeTag(tag, value = null, size = 0x01) {
         if(tag.writeObjToValue) { tag.writeObjToValue() }
-        return this.workers.write.schedule(this._writeTag.bind(this), [tag, value, size], {
-            priority: 1,
+
+        return this.worker_group.schedule(async (tag, value, size) => {
+            return await this._writeTag(tag, value, size)
+        }, [tag, value, size], {
+            priority: 10,
             timestamp: new Date()
-        });
+        })
+
+        // return this.workers.write.schedule(this._writeTag.bind(this), [tag, value, size], {
+        //     priority: 1,
+        //     timestamp: new Date()
+        // });
     }
 
     /**
@@ -644,7 +661,7 @@ export class Controller extends EthernetIP {
      * @memberof Controller
      */
     readTagGroup(group) {
-        return this.workers.group.schedule(this._readTagGroup.bind(this), [group], {
+        return this.worker_group.schedule(this._readTagGroup.bind(this), [group], {
             priority: 1,
             timestamp: new Date()
         });
@@ -658,8 +675,8 @@ export class Controller extends EthernetIP {
      * @memberof Controller
      */
     writeTagGroup(group) {
-        return this.workers.group.schedule(this._writeTagGroup.bind(this), [group], {
-            priority: 1,
+        return this.worker_group.schedule(this._writeTagGroup.bind(this), [group], {
+            priority: 10,
             timestamp: new Date()
         });
     }
@@ -699,28 +716,28 @@ export class Controller extends EthernetIP {
 
                 for(var ix = 0; ix < sub_parts.length; ix++){
                     let sub = sub_parts[ix];
-                    await this.workers.group.schedule(this._readTagGroup.bind(this), [sub], {
-                        priority: 10,
+                    await this.worker_group.schedule(this._readTagGroup.bind(this), [sub], {
+                        priority: 2,
                         timestamp: new Date()
                     })
 
-                    await this.workers.group.schedule(this._writeTagGroup.bind(this), [sub], {
-                            priority: 10,
+                    await this.worker_group.schedule(this._writeTagGroup.bind(this), [sub], {
+                            priority: 11,
                             timestamp: new Date()
                     })
                 }
                 
             }else{
                 //Less than 100 tags, read all at once
-                await this.workers.group
+                await this.worker_group
                 .schedule(this._readTagGroup.bind(this), [this.state.subs], {
-                    priority: 10,
+                    priority: 2,
                     timestamp: new Date()
                 })
 
-                await this.workers.group
+                await this.worker_group
                 .schedule(this._writeTagGroup.bind(this), [this.state.subs], {
-                    priority: 10,
+                    priority: 11,
                     timestamp: new Date()
                 })
 
